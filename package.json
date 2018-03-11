@@ -1,0 +1,26 @@
+{
+  "name": "minecraft-js",
+  "version": "0.0.1",
+  "description": "A complete library to manage Minecraft versions, assets, launching, and logging.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SirDavidLudwig/minecraft-js.git"
+  },
+  "keywords": [
+    "minecraft",
+    "javascript",
+    "version",
+    "log",
+    "launch"
+  ],
+  "author": "David Ludwig",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SirDavidLudwig/minecraft-js/issues"
+  },
+  "homepage": "https://github.com/SirDavidLudwig/minecraft-js#readme"
+}
