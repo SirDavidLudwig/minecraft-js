@@ -1,8 +1,10 @@
-const env = require("./environment");
+const env            = require("./environment");
+const versionManager = require("./versions/version_manager");
 
 /**
  * Export the modules
  */
 module.exports = {
-	environment: env
+	environment: env,
+	versions:    versionManager
 };
