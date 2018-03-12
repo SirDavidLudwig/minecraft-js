@@ -1,3 +1,32 @@
+const checksum = require("checksum");
+const jetpack  = require("fs-jetpack");
+
+/**
+ * Perform an integrity check on a file by comparing its SHA1 checksum
+ *
+ * @param  {String}   file
+ * @param  {String}   checksum SHA1 checksum
+ * @param  {Function} callback Callback that acceps {Boolean}
+ */
+var integrityCheck = function(file, checksum, callback) {
+	checksum.file(file, (err, sum) => {
+		callback(sum == checksum);
+	});
+};
+
+/**
+ * Generate the JAR path from its name
+ *
+ * @param  {String} value e.g. it.unimi.dsi:fastutil:7.1.0
+ * @return {String}       e.g. it/unimi/dsi/fastutil/7.1.0/fastutil-7.1.0.jar
+ */
+var jarPath = function(value) {
+	let parts     = value.split(':');
+	let namespace = parts[0].split(".");
+	return jetpack.cwd(...namespace).cwd(parts[1], parts[2])
+	              .path(`${parts[1]}-${parts[2]}.jar`);
+};
+
 /**
  * Determine if the given value is an exact match for the given regular expression
  *
@@ -29,6 +58,8 @@ var verifyUuid = function(uuid, partitioned = false) {
  * Export the module
  */
 module.exports = {
+	integrityCheck:  integrityCheck,
+	jarPath:         jarPath,
 	regexMatchExact: regexMatchExact,
 	verifyUuid:      verifyUuid
 }

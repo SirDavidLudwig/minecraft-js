@@ -1,10 +1,11 @@
-const got = require("got");
-
-const {Version} = require("./version");
-
+const networking      = require("../networking");
+const {Version}       = require("./version");
+const {VersionIndex}  = require("./version_index");
 
 // URL to the version manifest
 const URL_VERSION_MANIFEST = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
+
+// Version Listing ---------------------------------------------------------------------------------
 
 /**
  * Fetch the raw JSON manifest of available Minecraft versions
@@ -12,12 +13,7 @@ const URL_VERSION_MANIFEST = "https://launchermeta.mojang.com/mc/game/version_ma
  * @param {Function} callback Function to invoke with the result (error, result)
  */
 var fetchVersionsManifest = function(callback) {
-	got(URL_VERSION_MANIFEST, {"json": true})
-		.then(response => {
-			callback(undefined, response.body);
-		}).catch(err => {
-			callback(err, {});
-		});
+	networking.get(URL_VERSION_MANIFEST, callback)
 };
 
 /**
@@ -33,7 +29,7 @@ var fetchAll = function(callback) {
 		}
 		var result = { latest: {}, versions: [] };
 		versionList.versions.forEach(version => {
-			result.versions.push(new Version(version));
+			result.versions.push(new VersionIndex(version));
 		});
 		let found = 0x0;
 		let i = -1;
@@ -64,7 +60,7 @@ var fetchReleases = function (callback) {
 		var result = { latest: {}, versions: [] };
 		versionList.versions.forEach(version => {
 			if (version.type == Version.RELEASE)
-				result.versions.push(new Version(version));
+				result.versions.push(new VersionIndex(version));
 		});
 		result.latest.release = result.versions[0];
 		callback(undefined, result);
@@ -85,7 +81,7 @@ var fetchSnapshots = function(callback) {
 		var result = { latest: {}, versions: [] };
 		versionList.versions.forEach(version => {
 			if (version.type == Version.SNAPSHOT)
-				result.versions.push(new Version(version));
+				result.versions.push(new VersionIndex(version));
 		});
 		result.latest.snapshot = result.versions[0];
 		callback(undefined, result);
