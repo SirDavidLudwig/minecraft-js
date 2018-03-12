@@ -125,6 +125,18 @@ class Version
 	// General Methods -----------------------------------------------------------------------------
 
 	/**
+	 * Get the path to the JAR file
+	 *
+	 * @return {String}
+	 */
+	jarPath() {
+		var path = jetpack.cwd(env.get("minecraft_home"), "versions");
+		if (this.__jar)
+			return path.path(this.__jar, `${this.__jar}.jar`);
+		return path.path(this.__id, `${this.__id}.jar`);
+	}
+
+	/**
 	 * @todo Get the JSON representation for this version
 	 *
 	 * @return {JSON Object}
@@ -202,7 +214,7 @@ class Version
 	 * Get the path to where this version should be saved
 	 */
 	get path() {
-		jetpack.cwd(env.environment().minecraft_home, "versions", this.__id, `${this.__id}.json`);
+		jetpack.path(env.get("minecraft_home"), "versions", this.__id, `${this.__id}.json`);
 	}
 
 	/**
