@@ -22,15 +22,15 @@ class Library
 	 * specifying natives. This can be seen with the 'ca.weblite:java-objc-bridge:1.0.0' for OS X.
 	 * This should be checked andy verified, because it could change the logic behind this.
 	 *
-	 * Get the download URL if it exists
+	 * Get the artifact to download if it exists
 	 *
 	 * @return {String|Undefined}
 	 */
 	artifact() {
-		if (this.__downloads) {
+		if (this.__downloads && this.isRequired()) {
 			// Check for natives and classifiers, otherwise just use the artifact if it exists.
 			if (this.__natives && this.__downloads.classifiers) {
-				let native = this.__natives[os.detect()];
+				let native = this.__natives[env.get("os")];
 				if (native) {
 					return new Artifact(this.__downloads.classifiers[native]);
 				}
@@ -60,18 +60,18 @@ class Library
 	isRequired() {
 		if (this.__rules) {
 			var osRules = {}; // Initialize everything to 'disallow'
-			osRules[os.OS_LINUX]  = false;
+			osRules[os.OS_LINUX]   = false;
 			osRules[os.OS_OSX]     = false;
 			osRules[os.OS_WINDOWS] = false;
 			this.__rules.forEach(rule => {
 				if (rule.os) {
-					osRules[rule.os] = rule.action == "allow";
+					osRules[rule.os.name] = rule.action == "allow";
 				} else {
 					for (let i in osRules)
 						osRules[i] = rule.action == "allow";
 				}
 			});
-			return osRules[os.detect()];
+			return osRules[env.get("os")];
 		}
 		return true; // No rules specified, so it's required
 	}

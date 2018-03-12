@@ -1,3 +1,7 @@
+/**
+ * MinecraftJs is purposefuly configured to be running as Linux for testing purposes.
+ */
+
 const jetpack     = require("fs-jetpack");
 const test        = require("test");
 const _           = require("underscore");
@@ -5,7 +9,8 @@ const MinecraftJs = require("../src/index");
 
 // Configure the environment to use the test directory (./data)
 MinecraftJs.environment.set({
-	"minecraft_home": jetpack.path(__dirname, "data", "minecraft")
+	"minecraft_home": jetpack.path(__dirname, "data", "minecraft"),
+	"os":             MinecraftJs.os.OS_LINUX
 });
 
 // Path to unit tests

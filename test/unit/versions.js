@@ -51,7 +51,7 @@ exports["test Get Version From Index"] = function (assert, done) {
 			});
 		}
 	});
-}
+};
 
 exports["test Verify All Artifacts Are Defined"] = function (assert, done) {
 	var versionManager = require("../../src/index").versions;
@@ -71,4 +71,4 @@ exports["test Verify All Artifacts Are Defined"] = function (assert, done) {
 			});
 		}
 	});
-}
+};

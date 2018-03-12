@@ -85,6 +85,7 @@ class Version
 		this.__logging            = data.logging || null;
 		this.__mainClass          = data.mainClass;
 		this.__minLauncherVersion = data.minimumLauncherVersion;
+		this.__parent             = parent;
 		this.__releaseTime        = data.releaseTime;
 		this.__time               = data.releaseTime;
 		this.__type               = data.type

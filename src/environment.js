@@ -1,17 +1,23 @@
+const os = require("./operating_system");
+
 /**
  * The environment
  */
 var env = {
-	"java":           "/usr/bin/java",
-	"minecraft_home": "~/.minecraft",
+	"java":             "/usr/bin/java",
+	"minecraft_home":   "~/.minecraft",
+	"os":               os.detect()
 };
 
 /**
- * Get the current environment settings
+ * Get the current environment settings, or the specific settings for the given key
  *
+ * @param  {String|Undefined} key
  * @return {JSON Object}
  */
-var get = function() {
+var get = function(key = undefined) {
+	if (key)
+		return env[key];
 	return JSON.parse(JSON.stringify(env));
 };
 
