@@ -1,8 +1,8 @@
 const jetpack               = require("fs-jetpack");
 const env                   = require("../environment");
-const errors                = require("../error");
+const error                 = require("../error/error_index");
 const networking            = require("../networking");
-const {AssetIndexReference} = require("./asset_index_reference");
+const {AssetIndexManifest} = require("./asset_index_manifest");
 const {Library}             = require("./library");
 
 // Class constant declarations
@@ -27,10 +27,7 @@ class Version
 	static loadFromUrl(url, callback) {
 		networking.get(url, (err, data) => {
 			if (err) {
-				callback({
-					type: error.VERSION_DOWNLOAD_FAILED,
-					error: err
-				}, undefined);
+				callback(new error.FetchError(), undefined);
 				return;
 			}
 			callback(undefined, new Version(data));
@@ -46,10 +43,7 @@ class Version
 	static load(id, callback) {
 		var path = jetpack.cwd(env.environment().minecraft_home, "versions", id, `${id}.json`);
 		if (jetpack.exists() != "file") {
-			callback({
-				type:    errors.VERSION_MISSING,
-				version: id
-			}, undefined);
+			callback(new error.VersionMissingError(id), undefined);
 			return;
 		}
 		/**
@@ -59,11 +53,7 @@ class Version
 		 */
 		jsonfile.readFile(path, (err, data) => {
 			if (err) {
-				var error = {
-					type:    errors.VERSION_CORRUPTED,
-					version: id
-				};
-				callback(err, undefined);
+				callback(new error.VersionCorruptedError(id, err), undefined);
 				return;
 			}
 			if (data.inheritsFrom) {
@@ -87,7 +77,7 @@ class Version
 	 */
 	constructor(data, parent = null) {
 		this.__arguments          = {};
-		this.__assetIndex         = new AssetIndexReference(data.assetIndex);
+		this.__assetIndex         = new AssetIndexManifest(data.assetIndex);
 		this.__downloads          = data.downloads;
 		this.__id                 = data.id;
 		this.__jar                = data.jar;
@@ -168,9 +158,9 @@ class Version
 	}
 
 	/**
-	 * Get the asset index that belongs to this version
+	 * Get the asset index manifest that belongs to this version
 	 *
-	 * @return {AssetIndex}
+	 * @return {AssetIndexManifest}
 	 */
 	get assetIndex() {
 		return this.__assetIndex;

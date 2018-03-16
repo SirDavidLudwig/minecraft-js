@@ -1,7 +1,7 @@
 const checksum    = require("checksum");
 const jetpack     = require("fs-jetpack");
 const env         = require("../environment");
-const error       = require("../error");
+const error       = require("../error/error_index");
 const networking  = require("../networking");
 
 // Asset URL
@@ -29,16 +29,10 @@ class Asset
 	checkIntegrity(callback) {
 		checksum.file(this.path(), (err, hash) => {
 			if (err) {
-				callback({
-					type: error.INTEGRITY_CHECK_MISSING,
-					error: err
-				});
+				callback(new error.IntegrityMissingError(err));
 			}
 			else if (hash != this.__hash) {
-				callback({
-					type: error.INTEGRITY_CHECK_CORRUPTED,
-					error: undefined
-				});
+				callback(new error.IntegrityCorruptedError());
 			}
 			else
 				callback(undefined);

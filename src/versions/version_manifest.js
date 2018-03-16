@@ -5,7 +5,7 @@ const {Version}  = require("./version");
  * This class represents a version listing fetched from the manifest. It's like a version preview.
  * If this version is decided upon, invoke the `fetch` method to get the complete version.
  */
-class VersionReference
+class VersionManifest
 {
 	/**
 	 * Create a new version index instance with the following data from the version manifest
@@ -80,4 +80,4 @@ class VersionReference
 /**
  * Export the module
  */
-module.exports = { VersionReference };
+module.exports = { VersionManifest };

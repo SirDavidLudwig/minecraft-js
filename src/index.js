@@ -1,12 +1,25 @@
-const env            = require("./environment");
-const os             = require("./operating_system");
-const versionManager = require("./versions/version_manager");
-
 /**
  * Export the modules
  */
 module.exports = {
-	environment: env,
-	os:          os,
-	versions:    versionManager
+
+	/**
+	 * The configurable environment
+	 */
+	environment: require("./environment"),
+
+	/**
+	 * The error types that are used through minecraft-js
+	 */
+	error: require("./error/error_index"),
+
+	/**
+	 * A simple utility for standard operating system naming
+	 */
+	os: require("./operating_system"),
+
+	/**
+	 * The version management module
+	 */
+	versions: require("./versions/version_manager")
 };

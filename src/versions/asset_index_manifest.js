@@ -1,10 +1,10 @@
 const networking   = require("../networking");
 const {AssetIndex} = require("./asset_index");
 
-class AssetIndexReference
+class AssetIndexManifest
 {
 	/**
-	 * Create an instance of an asset index reference
+	 * Create an instance of an asset index manifest
 	 *
 	 * @param {JSON Object} data
 	 */
@@ -85,4 +85,4 @@ class AssetIndexReference
 /**
  * Export the module
  */
-module.exports = { AssetIndexReference };
+module.exports = { AssetIndexManifest };

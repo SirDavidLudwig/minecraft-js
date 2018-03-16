@@ -12,11 +12,10 @@ class AssetIndex
 	 */
 	static loadFromUrl(id, url, callback) {
 		networking.get(url, (err, data) => {
-			if (err) {
-				callback(err, undefined);
-				return;
-			}
-			callback(undefined, new AssetIndex(data));
+			if (err)
+				callback(new error.AssetIndexFetchError(id), undefined);
+			else
+				callback(undefined, new AssetIndex(data));
 		});
 	}
 

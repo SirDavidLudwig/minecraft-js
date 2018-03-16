@@ -1,7 +1,7 @@
 const jetpack           = require("fs-jetpack");
 const path              = require("path");
 const env               = require("../environment");
-const error             = require("../error");
+const error             = require("../error/error_index");
 const networking        = require("../networking");
 const os                = require("../operating_system");
 const utils             = require("../utils");
@@ -62,7 +62,7 @@ class Library
 	 */
 	download(callback) {
 		if (!this.canDownload()) {
-			callback({ type: error.LIBRARY_DOWNLOAD_UNAVAILABLE });
+			callback(new error.LibraryUnavailableError(this));
 			return;
 		}
 		networking.download(
@@ -70,10 +70,7 @@ class Library
 			jetpack.path(env.get("minecraft_home"), "libraries", this.path()),
 			err => {
 				if (err) {
-					callback({
-						type:  error.LIBRARY_DOWNLOAD_FAILED,
-						error: err
-					});
+					callback(new error.LibraryDownloadError(this, err));
 				} else {
 					callback(undefined);
 				}
