@@ -1,3 +1,6 @@
+const jetpack      = require("fs-jetpack");
+const jsonfile     = require("jsonfile");
+const env          = require("../environment");
 const networking   = require("../networking");
 const {AssetIndex} = require("./asset_index");
 
@@ -19,6 +22,28 @@ class AssetIndexManifest
 	// General Methods -----------------------------------------------------------------------------
 
 	/**
+	 * Check the integrity of the existing asset index
+	 *
+	 * @param {Function} callback (IntegrityError)
+	 */
+	checkIntegrity(callback) {
+		var path = this.path();
+		if (jetpack.exists(path) != "file") {
+			callback(new error.IntegrityMissingError());
+		}
+		else {
+			jsonfile.readFile(path, { throws: false }, (err, obj) => {
+				if (err) {
+					callback(new error.IntegrityCorruptedError());
+				}
+				else if (checksum(JSON.stringify(obj, null, "  ") != this.__sha1)) {
+					callback(new error.IntegrityModifiedError());
+				}
+			});
+		}
+	}
+
+	/**
 	 * Fetch the asset index from the interwebs
 	 *
 	 * @param {Function} callback
@@ -33,7 +58,16 @@ class AssetIndexManifest
 	 * @param {Function} callback
 	 */
 	load(callback) {
+		AssetIndex.load(this.__id, callback);
+	}
 
+	/**
+	 * Get the path of the index file
+	 *
+	 * @return {String}
+	 */
+	path() {
+		return jetpack.path(env.get("minecraft_home"), `assets/indexes/${this.__id}.json`);
 	}
 
 	// Accessors -----------------------------------------------------------------------------------

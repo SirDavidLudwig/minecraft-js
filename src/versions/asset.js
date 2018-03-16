@@ -21,6 +21,8 @@ class Asset
 		this.__size = data.size;
 	}
 
+	// General Methods -----------------------------------------------------------------------------
+
 	/**
 	 * Check the integrity of the asset file
 	 *
@@ -53,6 +55,18 @@ class Asset
 	}
 
 	/**
+	 * Convert the asset to its JSON format for the asset index (excludes the name for the key)
+	 *
+	 * @return {JSON Object}
+	 */
+	json() {
+		return {
+			"hash": this.__hash,
+			"size": this.__size
+		};
+	}
+
+	/**
 	 * Get the location of the asset
 	 *
 	 * @return {String}
@@ -64,6 +78,35 @@ class Asset
 			this.__hash.slice(0, 2),
 			this.__hash
 		);
+	}
+
+	// Accessors -----------------------------------------------------------------------------------
+
+	/**
+	 * Get the SHA1 hash of the asset
+	 *
+	 * @return {String}
+	 */
+	get hash() {
+		return this.__hash;
+	}
+
+	/**
+	 * Get the name of the asset
+	 *
+	 * @return {String}
+	 */
+	get name() {
+		return this.__name;
+	}
+
+	/**
+	 * Get the size of the asset
+	 *
+	 * @return {String}
+	 */
+	get size() {
+		return this.__size;
 	}
 }
 

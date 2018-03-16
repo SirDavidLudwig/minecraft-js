@@ -9,7 +9,7 @@ module.exports = {
 	environment: require("./environment"),
 
 	/**
-	 * The error types that are used through minecraft-js
+	 * The error types that are used throughout minecraft-js
 	 */
 	error: require("./error/error_index"),
 

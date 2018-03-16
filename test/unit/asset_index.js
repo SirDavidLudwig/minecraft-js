@@ -13,7 +13,7 @@ var fetchLatestVersion = function(callback) {
 			callback(latestVersion);
 		})
 	})
-}
+};
 
 exports["test Download Latest Minecraft Release"] = function (assert, done) {
 	fetchLatestVersion(version => {
@@ -25,8 +25,20 @@ exports["test Download Latest Minecraft Release"] = function (assert, done) {
 exports["test Get Asset Index"] = function (assert, done) {
 	fetchLatestVersion(version => {
 		version.assetIndex.fetch((err, assetIndex) => {
-			assert.equal(err, undefined, "No error fetching asset index");
+			assert.equal(err, undefined, "Asset index fetched");
 			done();
+		});
+	});
+};
+
+exports["test Download and Save Asset Index"] = function (assert, done) {
+	fetchLatestVersion(version => {
+		version.assetIndex.fetch((err, assetIndex) => {
+			assert.equal(err, undefined, "Asset index fetched");
+			assetIndex.save(err => {
+				assert.equal(err, null, "Asset index saved");
+				done();
+			});
 		});
 	});
 };
@@ -34,7 +46,7 @@ exports["test Get Asset Index"] = function (assert, done) {
 exports["test Download an Asset and Perform Integrity Check"] = function (assert, done) {
 	fetchLatestVersion(version => {
 		version.assetIndex.fetch((err, assetIndex) => {
-			assert.equal(err, undefined, "No error fetching asset index");
+			assert.equal(err, undefined, "Asset index fetched");
 			assetIndex.assets[0].download(error => {
 				assert.equal(error, undefined, "The asset has been downloaded");
 				assetIndex.assets[0].checkIntegrity(error => {

@@ -22,6 +22,7 @@ var files = [
 	"integrity_error",
 	"integrity_corrupted_error",
 	"integrity_missing_error",
+	"integrity_modified_error",
 
 	// Library errors
 	"library_error",

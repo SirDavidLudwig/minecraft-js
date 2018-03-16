@@ -1,5 +1,10 @@
-const networking = require("../networking");
-const {Asset}    = require("./asset");
+const fs          = require("fs");
+const jetpack     = require("fs-jetpack");
+const path        = require("path");
+const env         = require("../environment");
+const error       = require("../error/error_index");
+const networking  = require("../networking");
+const {Asset}     = require("./asset");
 
 class AssetIndex
 {
@@ -15,7 +20,7 @@ class AssetIndex
 			if (err)
 				callback(new error.AssetIndexFetchError(id), undefined);
 			else
-				callback(undefined, new AssetIndex(data));
+				callback(undefined, new AssetIndex(id, data));
 		});
 	}
 
@@ -34,7 +39,8 @@ class AssetIndex
 	 *
 	 * @param {JSON Object} data
 	 */
-	constructor(data) {
+	constructor(id, data) {
+		this.__id     = id;
 		this.__assets = [];
 		for (let name in data.objects) {
 			this.__assets.push(new Asset({
@@ -43,6 +49,43 @@ class AssetIndex
 				size: data.objects[name].size
 			}));
 		}
+	}
+
+	// General Methods -----------------------------------------------------------------------------
+
+	/**
+	 * Convert the asset index to JSON format
+	 *
+	 * @return {JSON Object}
+	 */
+	json() {
+		var objects = {};
+		this.__assets.forEach(asset => {
+			objects[asset.name] = asset.json();
+		});
+		return {
+			objects: objects
+		};
+	}
+
+	/**
+	 * Get the path of the index file
+	 *
+	 * @return {String}
+	 */
+	path() {
+		return jetpack.path(env.get("minecraft_home"), `assets/indexes/${this.__id}.json`);
+	}
+
+	/**
+	 * Save the asset index to the disk
+	 *
+	 * @param {Function} callback (error)
+	 */
+	save(callback) {
+		var file = this.path();
+		jetpack.dir(path.dirname(file));
+		fs.writeFile(file, JSON.stringify(this.json(), null, "  "), callback);
 	}
 
 	// Accessors -----------------------------------------------------------------------------------
@@ -54,6 +97,13 @@ class AssetIndex
 	 */
 	get assets() {
 		return this.__assets;
+	}
+
+	/**
+	 * Get the version ID of the asset index
+	 */
+	get id() {
+		return this.__id;
 	}
 }
 
