@@ -1,7 +1,7 @@
 /**
  * This class represents a downloadable artifact. It contains the size, sha1 hash, path, and URL.
  */
-class Artifact
+class LibraryArtifact
 {
 	constructor(data) {
 		this.__path = data.path;
@@ -52,4 +52,4 @@ class Artifact
 /**
  * Export the module
  */
-module.exports = { Artifact };
+module.exports = { LibraryArtifact };

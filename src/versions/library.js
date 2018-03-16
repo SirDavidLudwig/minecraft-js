@@ -1,8 +1,8 @@
-const jetpack    = require("fs-jetpack");
-const env        = require("../environment");
-const os         = require("../operating_system");
-const utils      = require("../utils");
-const {Artifact} = require("./artifact");
+const jetpack           = require("fs-jetpack");
+const env               = require("../environment");
+const os                = require("../operating_system");
+const utils             = require("../utils");
+const {LibraryArtifact} = require("./library_artifact");
 
 class Library
 {
@@ -32,11 +32,11 @@ class Library
 			if (this.__natives && this.__downloads.classifiers) {
 				let native = this.__natives[env.get("os")];
 				if (native) {
-					return new Artifact(this.__downloads.classifiers[native]);
+					return new LibraryArtifact(this.__downloads.classifiers[native]);
 				}
 			} else {
 				if (this.__downloads.artifact) {
-					return new Artifact(this.__downloads.artifact);
+					return new LibraryArtifact(this.__downloads.artifact);
 				}
 			}
 		}
