@@ -1,4 +1,23 @@
-const got = require("got");
+const downloadFile  = require("download-file");
+const got           = require("got");
+const jetpack       = require("fs-jetpack");
+const path          = require("path");
+
+/**
+ * Download a file from the given URL and save it to the given path
+ *
+ * @param {String}   url
+ * @param {String}   path Save destination
+ * @param {Function} callback (error)
+ */
+var download = function(url, filePath, callback) {
+	jetpack.dir(path.dirname(filePath));
+	var options = {
+		directory: path.dirname(filePath),
+		filename:  path.basename(filePath)
+	}
+	downloadFile(url, options, callback);
+}
 
 /**
  * Send a GET request and return a JSON object
@@ -19,5 +38,6 @@ var get = function(url, callback) {
  * Export the module
  */
 module.exports = {
-	get: get
+	download: download,
+	get:      get
 }

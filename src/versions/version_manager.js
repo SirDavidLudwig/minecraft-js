@@ -1,6 +1,6 @@
-const networking      = require("../networking");
-const {Version}       = require("./version");
-const {VersionIndex}  = require("./version_index");
+const networking          = require("../networking");
+const {Version}           = require("./version");
+const {VersionReference}  = require("./version_reference");
 
 // URL to the version manifest
 const URL_VERSION_MANIFEST = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
@@ -29,7 +29,7 @@ var fetchAll = function(callback) {
 		}
 		var result = { latest: {}, versions: [] };
 		versionList.versions.forEach(version => {
-			result.versions.push(new VersionIndex(version));
+			result.versions.push(new VersionReference(version));
 		});
 		let found = 0x0;
 		let i = -1;
@@ -60,7 +60,7 @@ var fetchReleases = function (callback) {
 		var result = { latest: {}, versions: [] };
 		versionList.versions.forEach(version => {
 			if (version.type == Version.RELEASE)
-				result.versions.push(new VersionIndex(version));
+				result.versions.push(new VersionReference(version));
 		});
 		result.latest.release = result.versions[0];
 		callback(undefined, result);
@@ -81,7 +81,7 @@ var fetchSnapshots = function(callback) {
 		var result = { latest: {}, versions: [] };
 		versionList.versions.forEach(version => {
 			if (version.type == Version.SNAPSHOT)
-				result.versions.push(new VersionIndex(version));
+				result.versions.push(new VersionReference(version));
 		});
 		result.latest.snapshot = result.versions[0];
 		callback(undefined, result);

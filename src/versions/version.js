@@ -1,9 +1,9 @@
-const jetpack      = require("fs-jetpack");
-const env          = require("../environment");
-const errors       = require("../error");
-const networking   = require("../networking");
-const {AssetIndex} = require("./asset_index");
-const {Library}    = require("./library");
+const jetpack               = require("fs-jetpack");
+const env                   = require("../environment");
+const errors                = require("../error");
+const networking            = require("../networking");
+const {AssetIndexReference} = require("./asset_index_reference");
+const {Library}             = require("./library");
 
 // Class constant declarations
 const ALPHA     = "old_alpha";
@@ -73,10 +73,13 @@ class Version
 
 	/**
 	 * Create a new version instance with the following data from the version manifest
+	 *
+	 * @param {JSON Object}  data
+	 * @param {Version|Null} parent
 	 */
-	constructor(data, parent) {
+	constructor(data, parent = null) {
 		this.__arguments          = {};
-		this.__assetIndex         = new AssetIndex(data.assetIndex);
+		this.__assetIndex         = new AssetIndexReference(data.assetIndex);
 		this.__downloads          = data.downloads;
 		this.__id                 = data.id;
 		this.__jar                = data.jar;

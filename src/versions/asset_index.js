@@ -1,57 +1,60 @@
+const networking = require("../networking");
+const {Asset}    = require("./asset");
+
 class AssetIndex
 {
 	/**
-	 * Create an instance of an asset index
+	 * Load the asset index from the given URL
+	 *
+	 * @param {String}   id       The asset version id (e.g. "1.12")
+	 * @param {String}   url
+	 * @param {Function} callback (error, AssetIndex)
+	 */
+	static loadFromUrl(id, url, callback) {
+		networking.get(url, (err, data) => {
+			if (err) {
+				callback(err, undefined);
+				return;
+			}
+			callback(undefined, new AssetIndex(data));
+		});
+	}
+
+	/**
+	 * Load the asset index of the given id from the disk
+	 *
+	 * @param {String}   id       The asset version id (e.g. "1.12")
+	 * @param {Function} callback (error, AssetIndex)
+	 */
+	static load(id, callback) {
+
+	}
+
+	/**
+	 * Create an instance of the asset index
+	 *
+	 * @param {JSON Object} data
 	 */
 	constructor(data) {
-		this.__id        = data.id;
-		this.__sha1      = data.sha1;
-		this.__size      = data.size;
-		this.__totalSize = data.totalSize;
-		this.__url       = data.url;
+		this.__assets = [];
+		for (let name in data.objects) {
+			this.__assets.push(new Asset({
+				hash: data.objects[name].hash,
+				name: name,
+				size: data.objects[name].size
+			}));
+		}
 	}
 
+	// Accessors -----------------------------------------------------------------------------------
+
 	/**
-	 * Get the asset index ID
+	 * Get the list of assets
 	 *
-	 * @return {String}
+	 * @return {Array<Asset>}
 	 */
-	get id() {
-		return this.__id;
-	}
-
-	/**
-	 * Get the SHA1 hash of the asset index
-	 *
-	 * @return {String}
-	 */
-	get sha1() {
-		return this.__sha1;
-	}
-
-	/**
-	 * Get the size of the asset index
-	 *
-	 * @return {Integer}
-	 */
-	get size() {
-		return this.__size;
-	}
-
-	/**
-	 * Get the total size of the assets
-	 *
-	 * @return {Integer}
-	 */
-	get totalSize() {
-		return this.__totalSize;
-	}
-
-	/**
-	 * Get the URL to the assets manifest
-	 */
-	get url() {
-		return this.__url;
+	get assets() {
+		return this.__assets;
 	}
 }
 

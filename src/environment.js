@@ -1,7 +1,7 @@
 const os = require("./operating_system");
 
 /**
- * The environment
+ * The default environment
  */
 var env = {
 	"java":             "/usr/bin/java",

@@ -40,7 +40,7 @@ exports["test Fetch Snapshots"] = function(assert, done) {
 	});
 };
 
-exports["test Get Version From Index"] = function (assert, done) {
+exports["test Get Version From Reference"] = function (assert, done) {
 	var versionManager = require("../../src/index").versions;
 	versionManager.fetchAll((err, result) => {
 		assert.equal(err, undefined, "Fetched versions from manifest");

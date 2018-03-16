@@ -2,10 +2,10 @@ const networking = require("../networking");
 const {Version}  = require("./version");
 
 /**
- * This class represents a version listing fetch from the manifest. It's like a version preview.
+ * This class represents a version listing fetched from the manifest. It's like a version preview.
  * If this version is decided upon, invoke the `fetch` method to get the complete version.
  */
-class VersionIndex
+class VersionReference
 {
 	/**
 	 * Create a new version index instance with the following data from the version manifest
@@ -18,7 +18,7 @@ class VersionIndex
 		this.__url         = data.url;
 	}
 
-	// Methods
+	// General Methods -----------------------------------------------------------------------------
 
 	/**
 	 * Fetch the version from the manifest
@@ -80,4 +80,4 @@ class VersionIndex
 /**
  * Export the module
  */
-module.exports = { VersionIndex };
+module.exports = { VersionReference };
