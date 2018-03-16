@@ -53,6 +53,21 @@ class AssetIndexManifest
 	}
 
 	/**
+	 * Get the JSON form of the asset index manifest
+	 *
+	 * @return {JSON Object}
+	 */
+	json() {
+		return {
+			id:        this.__id,
+			sha1:      this.__sha1,
+			size:      this.__size,
+			url:       this.__url,
+			totalSize: this.__totalSize
+		}
+	}
+
+	/**
 	 * Load the asset index from the disk
 	 *
 	 * @param {Function} callback

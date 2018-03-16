@@ -53,6 +53,22 @@ exports["test Get Version From Reference"] = function (assert, done) {
 	});
 };
 
+exports["test Save the Latest Release"] = function (assert, done) {
+	var versionManager = require("../../src/index").versions;
+	versionManager.fetchAll((err, result) => {
+		assert.equal(err, undefined, "Fetched versions from manifest");
+		if (!err) {
+			result.latest.release.fetch((err, version) => {
+				assert.equal(err, undefined, "Version fetched from online");
+				version.save(err => {
+					assert.equal(err, null, "The version has been saved to disk");
+					done();
+				})
+			});
+		}
+	});
+};
+
 exports["test Verify All Artifacts Are Defined"] = function (assert, done) {
 	var versionManager = require("../../src/index").versions;
 	versionManager.fetchAll((err, result) => {

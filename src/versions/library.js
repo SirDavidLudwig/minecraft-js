@@ -9,6 +9,7 @@ const utils             = require("../utils");
 class Library
 {
 	constructor(data) {
+		this.__json        = data; // There is a lot of stuff that can show up, I'll research the rest later
 		this.__downloads   = data.downloads;
 		this.__extract     = data.extract || undefined;
 		this.__name        = data.name;
@@ -85,6 +86,15 @@ class Library
 	 */
 	extract(callback) {
 		//
+	}
+
+	/**
+	 * Get the JSON representation of this library
+	 *
+	 * @return {JSON Object}
+	 */
+	json() {
+		return this.__json;
 	}
 
 	/**

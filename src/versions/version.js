@@ -1,4 +1,6 @@
+const fs                    = require("fs");
 const jetpack               = require("fs-jetpack");
+const path                  = require("path");
 const env                   = require("../environment");
 const error                 = require("../error/error_index");
 const networking            = require("../networking");
@@ -23,6 +25,9 @@ class Version
 
 	/**
 	 * Load a version from the given URL (ignores recursion)
+	 *
+	 * @param {String}   url
+	 * @param {Function} callback
 	 */
 	static loadFromUrl(url, callback) {
 		networking.get(url, (err, data) => {
@@ -77,18 +82,20 @@ class Version
 	 */
 	constructor(data, parent = null) {
 		this.__arguments          = {};
+		this.__assets             = data.assets;
 		this.__assetIndex         = new AssetIndexManifest(data.assetIndex);
 		this.__downloads          = data.downloads;
 		this.__id                 = data.id;
+		this.__inheritsFrom       = data.inheritsFrom;
 		this.__jar                = data.jar;
 		this.__legacyArguments    = false;
 		this.__libraries          = [];
-		this.__logging            = data.logging || null;
+		this.__logging            = data.logging;
 		this.__mainClass          = data.mainClass;
 		this.__minLauncherVersion = data.minimumLauncherVersion;
 		this.__parent             = parent;
 		this.__releaseTime        = data.releaseTime;
-		this.__time               = data.releaseTime;
+		this.__time               = data.time;
 		this.__type               = data.type
 		this.parseArguments(data.arguments || data.minecraftArguments);
 		this.parseLibraries(data.libraries);
@@ -138,12 +145,59 @@ class Version
 	}
 
 	/**
-	 * @todo Get the JSON representation for this version
+	 * Get the JSON representation for this version
 	 *
 	 * @return {JSON Object}
 	 */
 	json() {
-		//
+		var result = {
+			assetIndex:             this.__assetIndex.json(),
+			assets:                 this.__assets,
+			downloads:              this.__downloads,
+			id:                     this.__id,
+			inheritsFrom:           this.__inheritsFrom,
+			jar:                    this.__jar,
+			libraries:              [],
+			logging:                this.__logging,
+			mainClass:              this.__mainClass,
+			minimumLauncherVersion: this.__minLauncherVersion,
+			releaseTime:            this.__releaseTime,
+			time:                   this.__time,
+			type:                   this.__type
+		};
+		this.__libraries.forEach(library => {
+			result.libraries.push(library.json());
+		});
+		if (this.__legacyArguments) {
+			var args = this.__arguments.game.join(' ') + " " + this.__arguments.jvm.join(' ');
+			result.minecraftArguments = args.trimRight();
+		} else {
+			result.arguments = this.__arguments;
+		}
+		for (var key in result) // Clean out any undefined records
+			if (result[key] === undefined)
+				delete result[key];
+		return result;
+	}
+
+	/**
+	 * Get the path to where this version should be saved
+	 *
+	 * @return {String}
+	 */
+	path() {
+		return jetpack.path(env.get("minecraft_home"), "versions", this.__id, `${this.__id}.json`);
+	}
+
+	/**
+	 * Save the version to disk
+	 *
+	 * @param {Function} callback
+	 */
+	save(callback) {
+		var file = this.path();
+		jetpack.dir(path.dirname(file));
+		fs.writeFile(file, JSON.stringify(this.json(), null, "    "), callback);
 	}
 
 	// Accessors -----------------------------------------------------------------------------------
@@ -209,13 +263,6 @@ class Version
 	 */
 	get mainClass() {
 		return this.__mainClass;
-	}
-
-	/**
-	 * Get the path to where this version should be saved
-	 */
-	get path() {
-		jetpack.path(env.get("minecraft_home"), "versions", this.__id, `${this.__id}.json`);
 	}
 
 	/**
