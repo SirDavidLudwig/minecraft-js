@@ -58,6 +58,7 @@ var libDisallowAll = new Library({
 });
 
 var libAllowAll = new Library({
+	name: "org.lwjgl.lwjgl:lwjgl-platform:2.9.4-nightly-20150209",
 	downloads: {
 		artifact: SETTINGS[0],
 		classifiers: {
@@ -110,8 +111,8 @@ var libDisallowOther = new Library({
 	]
 });
 
-exports["test Standard Library Artifact"] = function (assert) {
-	var artifact = libStandard.artifact();
+exports["test Standard Library Artifact"] = function(assert) {
+	var artifact = libStandard.artifact;
 	assert.notEqual(artifact, undefined, "The artifact exists");
 	if (artifact) {
 		assert.equal(artifact.size, SETTINGS[0].size, "The size has been set");
@@ -121,8 +122,8 @@ exports["test Standard Library Artifact"] = function (assert) {
 	}
 };
 
-exports["test Library Artifact With Natives"] = function (assert) {
-	var artifact = libNatives.artifact();
+exports["test Library Artifact With Natives"] = function(assert) {
+	var artifact = libNatives.artifact;
 	assert.notEqual(artifact, undefined, "The artifact exists");
 	if (artifact) {
 		assert.equal(artifact.size, SETTINGS[1].size, "The size has been set");
@@ -132,18 +133,25 @@ exports["test Library Artifact With Natives"] = function (assert) {
 	}
 };
 
-exports["test Library Artifact Disallows All OS's"] = function (assert) {
-	assert.equal(libDisallowAll.artifact(), undefined, "The artifact doesn't exist");
+exports["test Library Artifact Disallows All OS's"] = function(assert) {
+	assert.equal(libDisallowAll.artifact, undefined, "The artifact doesn't exist");
 };
 
-exports["test Library Artifact Allow All OS's"] = function (assert) {
-	assert.notEqual(libAllowAll.artifact(), undefined, "The artifact is allowed");
+exports["test Library Artifact Allow All OS's"] = function(assert) {
+	assert.notEqual(libAllowAll.artifact, undefined, "The artifact is allowed");
 };
 
-exports["test Library Artifact Disallow Linux"] = function (assert) {
-	assert.equal(libDisallowLinux.artifact(), undefined, "The artifact is not allowed for Linux");
+exports["test Library Artifact Disallow Linux"] = function(assert) {
+	assert.equal(libDisallowLinux.artifact, undefined, "The artifact is not allowed for Linux");
 };
 
-exports["test Library Artifact Disallow Other OS"] = function (assert) {
-	assert.notEqual(libAllowAll.artifact(), undefined, "The artifact is not allowed for another OS");
+exports["test Library Artifact Disallow Other OS"] = function(assert) {
+	assert.notEqual(libAllowAll.artifact, undefined, "The artifact is not allowed for another OS");
+};
+
+exports["test Library Artifact Download"] = function(assert, done) {
+	libAllowAll.download(err => {
+		assert.equal(err, undefined, "Downloaded the library");
+		done();
+	});
 };

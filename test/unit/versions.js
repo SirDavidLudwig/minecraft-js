@@ -63,7 +63,7 @@ exports["test Verify All Artifacts Are Defined"] = function (assert, done) {
 				if (!err) {
 					version.libraries.forEach(lib => {
 						if (lib.isRequired()) {
-							assert.notEqual(lib.artifact(), undefined, "Artifact is valid");
+							assert.notEqual(lib.artifact, undefined, "Artifact is valid");
 						}
 					});
 				}

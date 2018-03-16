@@ -1,8 +1,10 @@
 const jetpack           = require("fs-jetpack");
+const path              = require("path");
 const env               = require("../environment");
+const error             = require("../error");
+const networking        = require("../networking");
 const os                = require("../operating_system");
 const utils             = require("../utils");
-const {LibraryArtifact} = require("./library_artifact");
 
 class Library
 {
@@ -13,35 +15,36 @@ class Library
 		this.__natives     = data.natives || undefined;
 		this.__rules       = data.rules   || undefined;
 		this.__url         = data.url     || undefined;
+		this.__artifact    = this.parseArtifacts();
 	}
 
-	// General Methods -----------------------------------------------------------------------------
+	// Private Methods -----------------------------------------------------------------------------
 
 	/**
-	 * @todo There may be a chance that native classifiers can be downloaded without explicitly
+	 * * @todo There may be a chance that native classifiers can be downloaded without explicitly
 	 * specifying natives. This can be seen with the 'ca.weblite:java-objc-bridge:1.0.0' for OS X.
 	 * This should be checked andy verified, because it could change the logic behind this.
 	 *
-	 * Get the artifact to download if it exists
-	 *
-	 * @return {String|Undefined}
+	 * Parse the given data, and figure the primary artifact
 	 */
-	artifact() {
+	parseArtifacts() {
 		if (this.__downloads && this.isRequired()) {
 			// Check for natives and classifiers, otherwise just use the artifact if it exists.
 			if (this.__natives && this.__downloads.classifiers) {
 				let native = this.__natives[env.get("os")];
 				if (native) {
-					return new LibraryArtifact(this.__downloads.classifiers[native]);
+					return this.__downloads.classifiers[native];
 				}
 			} else {
 				if (this.__downloads.artifact) {
-					return new LibraryArtifact(this.__downloads.artifact);
+					return this.__downloads.artifact;
 				}
 			}
 		}
 		return undefined;
 	}
+
+	// General Methods -----------------------------------------------------------------------------
 
 	/**
 	 * Determine if this library can be downloaded
@@ -49,7 +52,42 @@ class Library
 	 * @return {Boolean}
 	 */
 	canDownload() {
-		return this.artifact() != undefined;
+		return this.__artifact != undefined;
+	}
+
+	/**
+	 * Download the artifact
+	 *
+	 * @param {Function} callback (error)
+	 */
+	download(callback) {
+		if (!this.canDownload()) {
+			callback({ type: error.LIBRARY_DOWNLOAD_UNAVAILABLE });
+			return;
+		}
+		networking.download(
+			this.__artifact.url,
+			jetpack.path(env.get("minecraft_home"), "libraries", this.path()),
+			err => {
+				if (err) {
+					callback({
+						type:  error.LIBRARY_DOWNLOAD_FAILED,
+						error: err
+					});
+				} else {
+					callback(undefined);
+				}
+			}
+		);
+	}
+
+	/**
+	 * @todo
+	 *
+	 * @param {Function} callback (error)
+	 */
+	extract(callback) {
+		//
 	}
 
 	/**
@@ -82,7 +120,7 @@ class Library
 	 * @return {Boolean}
 	 */
 	needsExtraction() {
-		return this.__extract != null;
+		return this.__extract != undefined;
 	}
 
 	/**
@@ -95,6 +133,17 @@ class Library
 	}
 
 	// Accessors -----------------------------------------------------------------------------------
+
+	/**
+	 * Get the artifact to download
+	 *
+	 * @return {JSON Object|Undefined}
+	 */
+	get artifact() {
+		if (!this.__artifact)
+			return undefined;
+		return JSON.parse(JSON.stringify(this.__artifact));
+	}
 
 	/**
 	 * Get the extraction rules if they exist

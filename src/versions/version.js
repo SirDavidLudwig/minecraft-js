@@ -27,7 +27,10 @@ class Version
 	static loadFromUrl(url, callback) {
 		networking.get(url, (err, data) => {
 			if (err) {
-				callback(err, undefined);
+				callback({
+					type: error.VERSION_DOWNLOAD_FAILED,
+					error: err
+				}, undefined);
 				return;
 			}
 			callback(undefined, new Version(data));
@@ -49,6 +52,11 @@ class Version
 			}, undefined);
 			return;
 		}
+		/**
+		 * @todo This needs to be redone. It shouldn't just error out when loading because of a
+		 * missing version. It should only be checked when running an integrity check, or when a
+		 * launch task is attempting to start.
+		 */
 		jsonfile.readFile(path, (err, data) => {
 			if (err) {
 				var error = {

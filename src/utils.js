@@ -23,8 +23,7 @@ var integrityCheck = function(file, checksum, callback) {
 var jarPath = function(value) {
 	let parts     = value.split(':');
 	let namespace = parts[0].split(".");
-	return jetpack.cwd(...namespace).cwd(parts[1], parts[2])
-	              .path(`${parts[1]}-${parts[2]}.jar`);
+	return [...namespace, parts[1], parts[2], `${parts[1]}-${parts[2]}.jar`].join('/');
 };
 
 /**
