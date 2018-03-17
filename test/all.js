@@ -3,6 +3,7 @@
  */
 
 const jetpack     = require("fs-jetpack");
+const process     = require("process");
 const test        = require("test");
 const _           = require("underscore");
 const MinecraftJs = require("../src/index");
@@ -13,8 +14,9 @@ MinecraftJs.environment.set({
 	"os":             MinecraftJs.os.OS_LINUX
 });
 
-// Path to unit tests
-var unitPath = jetpack.cwd(__dirname, "unit");
+// Paths to tests
+var featurePath = jetpack.cwd(__dirname, "feature");
+var unitPath    = jetpack.cwd(__dirname, "unit");
 
 // Compile the unit tests together
 var unitTests = {};
@@ -25,5 +27,8 @@ unitPath.list().forEach(function(file) {
 
 // Execute all of the tests
 if (module == require.main) {
-	test.run(unitTests);
+	if (process.argv.length > 2)
+		test.run(require(featurePath.path(process.argv[2])));
+	else
+		test.run(unitTests);
 }

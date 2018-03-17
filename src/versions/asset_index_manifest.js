@@ -1,6 +1,8 @@
+const checksum     = require("checksum");
 const jetpack      = require("fs-jetpack");
 const jsonfile     = require("jsonfile");
 const env          = require("../environment");
+const error        = require("../error/error_index");
 const networking   = require("../networking");
 const {AssetIndex} = require("./asset_index");
 
@@ -32,12 +34,15 @@ class AssetIndexManifest
 			callback(new error.IntegrityMissingError());
 		}
 		else {
-			jsonfile.readFile(path, { throws: false }, (err, obj) => {
+			jsonfile.readFile(path, (err, obj) => {
 				if (err) {
 					callback(new error.IntegrityCorruptedError());
 				}
-				else if (checksum(JSON.stringify(obj, null, "  ") != this.__sha1)) {
+				else if (checksum(JSON.stringify(obj, null, "  ")) != this.__sha1) {
 					callback(new error.IntegrityModifiedError());
+				}
+				else {
+					callback(null);
 				}
 			});
 		}
@@ -46,7 +51,7 @@ class AssetIndexManifest
 	/**
 	 * Fetch the asset index from the interwebs
 	 *
-	 * @param {Function} callback
+	 * @param {Function} callback (err, AssetIndex)
 	 */
 	fetch(callback) {
 		AssetIndex.loadFromUrl(this.__id, this.__url, callback);

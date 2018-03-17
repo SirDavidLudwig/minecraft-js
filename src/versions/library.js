@@ -1,3 +1,4 @@
+const checksum          = require("checksum");
 const jetpack           = require("fs-jetpack");
 const path              = require("path");
 const env               = require("../environment");
@@ -48,6 +49,27 @@ class Library
 	// General Methods -----------------------------------------------------------------------------
 
 	/**
+	 * Check the integrity of the library
+	 *
+	 * @param {Function} callback (IntegrityError)
+	 */
+	checkIntegrity(callback) {
+		if (!this.__artifact) {
+			callback(null);
+		}
+		else {
+			checksum.file(this.path(), (err, hash) => {
+				if (err)
+					callback(new error.IntegrityMissingError());
+				else if (hash != this.__artifact.sha1)
+					callback(new error.IntegrityCorruptedError());
+				else
+					callback(null);
+			});
+		}
+	}
+
+	/**
 	 * Determine if this library can be downloaded
 	 *
 	 * @return {Boolean}
@@ -68,7 +90,7 @@ class Library
 		}
 		networking.download(
 			this.__artifact.url,
-			jetpack.path(env.get("minecraft_home"), "libraries", this.path()),
+			this.path(),
 			err => {
 				if (err) {
 					callback(new error.LibraryDownloadError(this, err));
@@ -136,7 +158,9 @@ class Library
 	 *	@return {String}
 	 */
 	path() {
-		return utils.jarPath(this.__name);
+		if (this.__artifact)
+			return jetpack.path(env.get("minecraft_home"), "libraries", this.__artifact.path);
+		return jetpack.path(env.get("minecraft_home"), "libraries", utils.jarPath(this.__name));
 	}
 
 	// Accessors -----------------------------------------------------------------------------------

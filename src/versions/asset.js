@@ -47,11 +47,10 @@ class Asset
 	 * @param {Function} callback (error)
 	 */
 	download(callback) {
-		console.log("Downloading asset: ", `${ASSET_URL}${this.__hash.slice(0, 2)}/${this.__hash}`);
 		networking.download(
 			ASSET_URL + `${this.__hash.slice(0, 2)}/${this.__hash}`,
 			this.path(),
-			err => { callback(err ? err : undefined); });
+			err => { callback(err ? err : null); });
 	}
 
 	/**

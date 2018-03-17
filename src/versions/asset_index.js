@@ -1,5 +1,6 @@
 const fs          = require("fs");
 const jetpack     = require("fs-jetpack");
+const jsonfile    = require("jsonfile");
 const path        = require("path");
 const env         = require("../environment");
 const error       = require("../error/error_index");
@@ -18,9 +19,9 @@ class AssetIndex
 	static loadFromUrl(id, url, callback) {
 		networking.get(url, (err, data) => {
 			if (err)
-				callback(new error.AssetIndexFetchError(id), undefined);
+				callback(new error.AssetIndexFetchError(id), null);
 			else
-				callback(undefined, new AssetIndex(id, data));
+				callback(null, new AssetIndex(id, data));
 		});
 	}
 
@@ -31,7 +32,18 @@ class AssetIndex
 	 * @param {Function} callback (error, AssetIndex)
 	 */
 	static load(id, callback) {
-
+		var filePath = jetpack.path(env.get("minecraft_home"), `assets/indexes/${id}.json`);
+		if (jetpack.exists(filePath) != "file") {
+			callback(new error.IntegrityMissingError(), null);
+		} else {
+			jsonfile.readFile(filePath, {throws: false}, (err, data) => {
+				if (err) {
+					callback(new error.IntegrityCorruptedError, null);
+				} else {
+					callback(null, new AssetIndex(id, data));
+				}
+			});
+		}
 	}
 
 	/**

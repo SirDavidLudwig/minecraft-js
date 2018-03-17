@@ -105,15 +105,6 @@ var fetch = function(versionId, callback) {
 };
 
 /**
- * Install the version from the given manifest
- *
- * @param {VersionManifest} version
- */
-var install = function(version) {
-
-};
-
-/**
  * Get the installed versions
  *
  * @return {Array<String>} list of version IDs to load
