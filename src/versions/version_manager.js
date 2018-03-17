@@ -131,6 +131,15 @@ var load = function(versionId, callback) {
 };
 
 /**
+ * Remove an installed Minecraft version
+ *
+ * @param {String} versionId
+ */
+var remove = function(versionId) {
+	jetpack.cwd(env.get("minecraft_home"), `versions/${versionId}`).remove();
+};
+
+/**
  * Export the module
  */
 module.exports = {
@@ -139,5 +148,6 @@ module.exports = {
 	fetchReleases:  fetchReleases,
 	fetchSnapshots: fetchSnapshots,
 	installed:      installed,
-	load:           load
+	load:           load,
+	remove:         remove
 };

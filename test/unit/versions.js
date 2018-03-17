@@ -1,3 +1,4 @@
+const jetpack   = require("fs-jetpack");
 const {Version} = require("../../src/versions/version");
 
 exports["test Fetch All"] = function(assert, done) {
@@ -120,5 +121,18 @@ exports["test Load Installed Version"] = function (assert, done) {
 	var versions = versionManager.installed();
 	versionManager.load(versions[0], (err, version) => {
 		assert.equal(err, null, "Load the installed version");
+		done();
+	});
+};
+
+exports["test Remove Installed Version"] = function (assert, done) {
+	var env = require("../../src/index").environment;
+	var versionManager = require("../../src/index").versions;
+	var versions = versionManager.installed();
+	versionManager.load(versions[0], (err, version) => {
+		assert.equal(err, null, "Load the installed version");
+		versionManager.remove(version.id);
+		assert.equal(jetpack.exists(jetpack.path(env.get("minecraft_home"), `versions/${version.id}`)), false, "Version has been removed");
+		done();
 	});
 };
