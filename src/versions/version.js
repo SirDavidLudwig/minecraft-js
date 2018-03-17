@@ -2,6 +2,7 @@ const _                    = require("underscore");
 const checksum             = require("checksum");
 const fs                   = require("fs");
 const jetpack              = require("fs-jetpack");
+const jsonfile             = require("jsonfile");
 const path                 = require("path");
 const env                  = require("../environment");
 const error                = require("../error/error_index");
@@ -48,8 +49,8 @@ class Version
 	 * @param {Function} callback (err, version)
 	 */
 	static load(id, callback) {
-		var path = jetpack.cwd(env.environment().minecraft_home, "versions", id, `${id}.json`);
-		if (jetpack.exists() != "file") {
+		var filePath = jetpack.path(env.get("minecraft_home"), "versions", id, `${id}.json`);
+		if (jetpack.exists(filePath) != "file") {
 			callback(new error.VersionMissingError(id), null);
 			return;
 		}
@@ -58,7 +59,7 @@ class Version
 		 * missing version. It should only be checked when running an integrity check, or when a
 		 * launch task is attempting to start.
 		 */
-		jsonfile.readFile(path, (err, data) => {
+		jsonfile.readFile(filePath, (err, data) => {
 			if (err) {
 				callback(new error.VersionCorruptedError(id, err), null);
 				return;

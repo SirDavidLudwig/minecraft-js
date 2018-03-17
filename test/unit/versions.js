@@ -42,7 +42,7 @@ exports["test Fetch Snapshots"] = function (assert, done) {
 
 exports["test Fetch Specific Version"] = function (assert, done) {
 	var versionManager = require("../../src/index").versions;
-	versionManager.fetchVersion("1.12.2", (err, result) => {
+	versionManager.fetch("1.12.2", (err, result) => {
 		assert.equal(err, null, "Fetched versions from manifest");
 		assert.notEqual(result, null, "Fetched the version itself");
 		done();
@@ -112,5 +112,13 @@ exports["test Download the Latest Release Jar and Check Integrity"] = function (
 				})
 			});
 		}
+	});
+};
+
+exports["test Load Installed Version"] = function (assert, done) {
+	var versionManager = require("../../src/index").versions;
+	var versions = versionManager.installed();
+	versionManager.load(versions[0], (err, version) => {
+		assert.equal(err, null, "Load the installed version");
 	});
 };

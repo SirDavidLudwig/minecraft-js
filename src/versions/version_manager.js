@@ -1,3 +1,5 @@
+const jetpack           = require("fs-jetpack");
+const env               = require("../environment");
 const error             = require("../error/error_index");
 const networking        = require("../networking");
 const {Version}         = require("./version");
@@ -89,7 +91,7 @@ var fetchSnapshots = function(callback) {
  *
  * @return {VersionManifest|Null} (err, )
  */
-var fetchVersion = function(versionId, callback) {
+var fetch = function(versionId, callback) {
 	fetchAll((err, versionList) => {
 		if (err) {
 			callback(err, null);
@@ -100,14 +102,51 @@ var fetchVersion = function(versionId, callback) {
 				callback(null, versionList.versions[versionId]);
 		}
 	})
-}
+};
+
+/**
+ * Install the version from the given manifest
+ *
+ * @param {VersionManifest} version
+ */
+var install = function(version) {
+
+};
+
+/**
+ * Get the installed versions
+ *
+ * @return {Array<String>} list of version IDs to load
+ */
+var installed = function() {
+	var path     = jetpack.path(env.get("minecraft_home"), "versions/");
+	var versions = [];
+	jetpack.list(path).forEach(file => {
+		if (jetpack.cwd(path, file).exists(`${file}.json`)) {
+			versions.push(file);
+		}
+	});
+	return versions;
+};
+
+/**
+ * Load a version on the disk
+ *
+ * @param {String}   versionId Version ID of the version to load
+ * @param {Function} callback  (err, Version|null)
+ */
+var load = function(versionId, callback) {
+	Version.load(versionId, callback);
+};
 
 /**
  * Export the module
  */
 module.exports = {
+	fetch:          fetch,
 	fetchAll:       fetchAll,
 	fetchReleases:  fetchReleases,
 	fetchSnapshots: fetchSnapshots,
-	fetchVersion:   fetchVersion
+	installed:      installed,
+	load:           load
 };
