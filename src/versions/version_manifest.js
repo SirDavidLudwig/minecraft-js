@@ -1,5 +1,6 @@
-const networking = require("../networking");
-const {Version}  = require("./version");
+const networking           = require("../networking");
+const {Version}            = require("./version");
+const {VersionInstallTask} = require("../task/version_install_task");
 
 /**
  * This class represents a version listing fetched from the manifest. It's like a version preview.
@@ -27,6 +28,15 @@ class VersionManifest
 	 */
 	fetch(callback) {
 		Version.loadFromUrl(this.__url, callback);
+	}
+
+	/**
+	 * Create an installation task (You will need to start it manually)
+	 *
+	 * @return {VersionInstallTask}
+	 */
+	install() {
+		return new VersionInstallTask(this);
 	}
 
 	// Accessors -----------------------------------------------------------------------------------
