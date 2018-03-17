@@ -1,11 +1,13 @@
-const fs                    = require("fs");
-const jetpack               = require("fs-jetpack");
-const path                  = require("path");
-const env                   = require("../environment");
-const error                 = require("../error/error_index");
-const networking            = require("../networking");
+const _                    = require("underscore");
+const checksum             = require("checksum");
+const fs                   = require("fs");
+const jetpack              = require("fs-jetpack");
+const path                 = require("path");
+const env                  = require("../environment");
+const error                = require("../error/error_index");
+const networking           = require("../networking");
 const {AssetIndexManifest} = require("./asset_index_manifest");
-const {Library}             = require("./library");
+const {Library}            = require("./library");
 
 // Class constant declarations
 const ALPHA     = "old_alpha";
@@ -32,7 +34,7 @@ class Version
 	static loadFromUrl(url, callback) {
 		networking.get(url, (err, data) => {
 			if (err) {
-				callback(new error.FetchError(), undefined);
+				callback(new error.FetchError(), null);
 				return;
 			}
 			callback(undefined, new Version(data));
@@ -48,7 +50,7 @@ class Version
 	static load(id, callback) {
 		var path = jetpack.cwd(env.environment().minecraft_home, "versions", id, `${id}.json`);
 		if (jetpack.exists() != "file") {
-			callback(new error.VersionMissingError(id), undefined);
+			callback(new error.VersionMissingError(id), null);
 			return;
 		}
 		/**
@@ -58,18 +60,18 @@ class Version
 		 */
 		jsonfile.readFile(path, (err, data) => {
 			if (err) {
-				callback(new error.VersionCorruptedError(id, err), undefined);
+				callback(new error.VersionCorruptedError(id, err), null);
 				return;
 			}
 			if (data.inheritsFrom) {
 				Version.load(data.inheritsFrom, (err, version) => {
 					if (err)
-						callback(err, undefined);
+						callback(err, null);
 					else
-						callback(undefined, new Version(data, version));
+						callback(null, new Version(data, version));
 				});
 			} else {
-				callback(undefined, new Version(data));
+				callback(null, new Version(data));
 			}
 		});
 	}
@@ -83,7 +85,7 @@ class Version
 	constructor(data, parent = null) {
 		this.__arguments          = {};
 		this.__assets             = data.assets;
-		this.__assetIndex         = new AssetIndexManifest(data.assetIndex);
+		this.__assetIndex         = undefined;
 		this.__downloads          = data.downloads;
 		this.__id                 = data.id;
 		this.__inheritsFrom       = data.inheritsFrom;
@@ -98,6 +100,7 @@ class Version
 		this.__time               = data.time;
 		this.__type               = data.type
 		this.parseArguments(data.arguments || data.minecraftArguments);
+		this.parseAssetIndexManifest(data.assetIndex);
 		this.parseLibraries(data.libraries);
 	}
 
@@ -120,6 +123,15 @@ class Version
 	}
 
 	/**
+	 * Parse the given asset index manifest
+	 *
+	 * @param {JSON Object} manifest The asset index manifest
+	 */
+	parseAssetIndexManifest(manifest) {
+		this.__assetIndex = manifest ? new AssetIndexManifest(manifest) : null;
+	}
+
+	/**
 	 * Parse the libraries that this version will use
 	 *
 	 * @param {Array} libraries
@@ -131,6 +143,40 @@ class Version
 	}
 
 	// General Methods -----------------------------------------------------------------------------
+
+	/**
+	 * Check the integrity of the JAR file
+	 *
+	 * @param {Function} callback (error)
+	 */
+	checkIntegrity(callback) {
+		if (jetpack.exists(this.jarPath()) != "file") {
+			callback(new error.IntegrityMissingError());
+		} else {
+			checksum.file(this.jarPath(), (err, hash) => {
+				if (hash != this.downloads.client.sha1) {
+					callback(new error.IntegrityCorruptedError());
+				} else {
+					callback(null);
+				}
+			});
+		}
+	}
+
+	/**
+	 * Download the client JAR
+	 *
+	 * @param {Function} callback (error)
+	 */
+	downloadClient(callback) {
+		if (!this.downloads.client) {
+			callback(new error.VersionClientUnavailableError(this.__id));
+		} else {
+			networking.download(this.downloads.client.url, this.jarPath(), (err) => {
+				callback(err ? new error.VersionClientDownloadError(this.__id) : null);
+			});
+		}
+	}
 
 	/**
 	 * Get the path to the JAR file
@@ -208,15 +254,24 @@ class Version
 	 * @return {JSON Object}
 	 */
 	get arguments() {
-		return this.__arguments;
+		var result = { game: [], jvm: [] };
+		if (this.__parent) {
+			result.game = this.__parent.arguments.game;
+			result.jvm  = this.__parent.arguments.jvm;
+		}
+		result.game = _.union(result.game, this.__arguments.game);
+		result.jvm  = _.union(result.jnm, this.__arguments.jvm);
+		return result;
 	}
 
 	/**
-	 * Get the asset index manifest that belongs to this version
+	 * Get the asset index manifest
 	 *
 	 * @return {AssetIndexManifest}
 	 */
 	get assetIndex() {
+		if (this.__parent && !this.__assetIndex)
+			return this.__parent.assetIndex;
 		return this.__assetIndex;
 	}
 
@@ -226,7 +281,9 @@ class Version
 	 * @return {JSON Object}
 	 */
 	get downloads() {
-		return JSON.parse(JSON.stringify(this.__downloads));
+		var result = this.__parent ? this.downloads : {};
+		_.extend(result, JSON.parse(JSON.stringify(this.__downloads)));
+		return result;
 	}
 
 	/**
@@ -244,7 +301,8 @@ class Version
 	 * @return {Array}
 	 */
 	get libraries() {
-		return this.__libraries;
+		var result = this.__parent ? this.__parent.libraries : [];
+		return _.union(result, this.__libraries);
 	}
 
 	/**
@@ -253,6 +311,8 @@ class Version
 	 * @return {JSON Object|Null}
 	 */
 	get logging() {
+		if (this.__parent && !this.__logging)
+			return this.__parent.logging;
 		return this.__logging;
 	}
 
@@ -262,6 +322,8 @@ class Version
 	 * @return {String}
 	 */
 	get mainClass() {
+		if (this.__parent && !this.__mainClass)
+			return this.__parent.mainClass;
 		return this.__mainClass;
 	}
 
@@ -289,16 +351,9 @@ class Version
 	 * @return {String}
 	 */
 	get type() {
+		if (this.__parent && !this.__type)
+			return this.__parent.type
 		return this.__type;
-	}
-
-	/**
-	 * Get the URL to this version's manifest
-	 *
-	 * @return {String|Undefined}
-	 */
-	get url() {
-		return this.__url;
 	}
 }
 

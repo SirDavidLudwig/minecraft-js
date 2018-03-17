@@ -31,6 +31,8 @@ var files = [
 
 	// Version errors
 	"version_error",
+	"version_client_download_error",
+	"version_client_unavailable_error",
 	"version_corrupted_error",
 	"version_manifest_fetch_error",
 	"version_missing_error"
