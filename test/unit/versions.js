@@ -14,28 +14,37 @@ exports["test Fetch Releases"] = function(assert, done) {
 		assert.equal(err, null, "Fetched versions from manifest");
 		if (!err) {
 			var count = 0;
-			result.versions.forEach((version) => {
+			Object.values(result.versions).forEach((version) => {
 				if (version.type == Version.RELEASE)
 					count++;
 			});
-			assert.equal(count, result.versions.length, "All versions are releases");
+			assert.equal(count, Object.keys(result.versions).length, "All versions are releases");
 		}
 		done();
 	});
 };
 
-exports["test Fetch Snapshots"] = function(assert, done) {
+exports["test Fetch Snapshots"] = function (assert, done) {
 	var versionManager = require("../../src/index").versions;
 	versionManager.fetchSnapshots((err, result) => {
 		assert.equal(err, null, "Fetched versions from manifest");
 		if (!err) {
 			var count = 0;
-			result.versions.forEach((version) => {
+			Object.values(result.versions).forEach((version) => {
 				if (version.type == Version.SNAPSHOT)
 					count++;
 			});
-			assert.equal(count, result.versions.length, "All versions are snapshots");
+			assert.equal(count, Object.keys(result.versions).length, "All versions are snapshots");
 		}
+		done();
+	});
+};
+
+exports["test Fetch Specific Version"] = function (assert, done) {
+	var versionManager = require("../../src/index").versions;
+	versionManager.fetchVersion("1.12.2", (err, result) => {
+		assert.equal(err, null, "Fetched versions from manifest");
+		assert.notEqual(result, null, "Fetched the version itself");
 		done();
 	});
 };
@@ -44,12 +53,10 @@ exports["test Get Version From Reference"] = function (assert, done) {
 	var versionManager = require("../../src/index").versions;
 	versionManager.fetchAll((err, result) => {
 		assert.equal(err, null, "Fetched versions from manifest");
-		if (!err) {
-			result.latest.release.fetch((err, version) => {
-				assert.equal(err, null, "Version fetched from online");
-				done();
-			});
-		}
+		result.latest.release.fetch((err, version) => {
+			assert.equal(err, null, "Version fetched from online");
+			done();
+		});
 	});
 };
 

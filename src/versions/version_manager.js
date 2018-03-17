@@ -1,7 +1,7 @@
-const error               = require("../error/error_index");
-const networking          = require("../networking");
-const {Version}           = require("./version");
-const {VersionManifest}   = require("./version_manifest");
+const error             = require("../error/error_index");
+const networking        = require("../networking");
+const {Version}         = require("./version");
+const {VersionManifest} = require("./version_manifest");
 
 // URL to the version manifest
 const URL_VERSION_MANIFEST = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
@@ -29,25 +29,16 @@ var fetchVersionsManifest = function(callback) {
 var fetchAll = function(callback) {
 	fetchVersionsManifest((err, versionList) => {
 		if (err) {
-			callback(err, undefined);
+			callback(err, null);
 			return;
 		}
-		var result = { latest: {}, versions: [] };
+		var result = { latest: {}, versions: {} };
 		versionList.versions.forEach(version => {
-			result.versions.push(new VersionManifest(version));
+			result.versions[version.id] = new VersionManifest(version);
 		});
-		let found = 0x0;
-		let i = -1;
-		while (~found & 0x3 && ++i < result.versions.length) {
-			if (result.versions[i].type == "snapshot" && ~found & 0x1) {
-				found |= 0x1;
-				result.latest.snapshot = result.versions[i];
-			} else if (result.versions[i].type == "release" && ~found & 0x2) {
-				found |= 0x2;
-				result.latest.release = result.versions[i];
-			}
-		}
-		callback(undefined, result);
+		result.latest.release  = result.versions[versionList.latest.release];
+		result.latest.snapshot = result.versions[versionList.latest.snapshot];
+		callback(null, result);
 	});
 };
 
@@ -59,16 +50,16 @@ var fetchAll = function(callback) {
 var fetchReleases = function (callback) {
 	fetchVersionsManifest((err, versionList) => {
 		if (err) {
-			callback(err, undefined);
+			callback(err, null);
 			return;
 		}
-		var result = { latest: {}, versions: [] };
+		var result = { latest: {}, versions: {} };
 		versionList.versions.forEach(version => {
 			if (version.type == Version.RELEASE)
-				result.versions.push(new VersionManifest(version));
+				result.versions[version.id] = new VersionManifest(version);
 		});
-		result.latest.release = result.versions[0];
-		callback(undefined, result);
+		result.latest.release = result.versions[versionList.latest.release];
+		callback(null, result);
 	});
 };
 
@@ -80,18 +71,36 @@ var fetchReleases = function (callback) {
 var fetchSnapshots = function(callback) {
 	fetchVersionsManifest((err, versionList) => {
 		if (err) {
-			callback(err, undefined);
+			callback(err, null);
 			return;
 		}
-		var result = { latest: {}, versions: [] };
+		var result = { latest: {}, versions: {} };
 		versionList.versions.forEach(version => {
 			if (version.type == Version.SNAPSHOT)
-				result.versions.push(new VersionManifest(version));
+				result.versions[version.id] = new VersionManifest(version);
 		});
-		result.latest.snapshot = result.versions[0];
-		callback(undefined, result);
+		result.latest.snapshot = result.versions[versionList.latest.snapshot];
+		callback(null, result);
 	});
 };
+
+/**
+ * Fetch a specific version manifest
+ *
+ * @return {VersionManifest|Null} (err, )
+ */
+var fetchVersion = function(versionId, callback) {
+	fetchAll((err, versionList) => {
+		if (err) {
+			callback(err, null);
+		} else {
+			if (!versionList.versions[versionId])
+				callback(null, null);
+			else
+				callback(null, versionList.versions[versionId]);
+		}
+	})
+}
 
 /**
  * Export the module
@@ -99,5 +108,6 @@ var fetchSnapshots = function(callback) {
 module.exports = {
 	fetchAll:       fetchAll,
 	fetchReleases:  fetchReleases,
-	fetchSnapshots: fetchSnapshots
+	fetchSnapshots: fetchSnapshots,
+	fetchVersion:   fetchVersion
 };
